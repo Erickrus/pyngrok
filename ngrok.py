@@ -19,10 +19,17 @@ class Ngrok:
     self.downloadUrl = "https://bin.equinox.io/c/4VmDzA7iaHb/%s" % self.zipFilename
 
   def install(self):
-    os.system("wget %s" % self.downloadUrl )
+    if os.path.exists('ngrok'):
+      print("skip install")
+      time.sleep(2)
+      return self
+
+    # install
+    os.system( "wget %s" % self.downloadUrl )
     time.sleep(2)
-    os.system("unzip %s" % self.zipFilename )
+    os.system( "unzip %s" % self.zipFilename )
     time.sleep(2)
+    return self
 
 
   def is_available(self):
@@ -37,6 +44,7 @@ class Ngrok:
     print("ngrok.start_service()")
     os.system(self.serviceCommand)
     time.sleep(5)
+    return self
 
 
   def stop_service(self):
@@ -48,6 +56,7 @@ class Ngrok:
     except:
       pass
     time.sleep(5)
+    return self
 
 
   def get_service_url(self):
@@ -65,13 +74,14 @@ class Ngrok:
 
 
   def message(self, text, msg_func=print):
-    msg_func("ngrok.message('%s')" % text)
+    msg_func("\nngrok.message('%s')" % text)
+    return self
 
 
   def authtoken(self, token):
     os.system("./ngrok authtoken %s" % token)
     time.sleep(2)
-
+    return self
 
   def daemon(self):
     self.message(self.get_service_url())
@@ -80,12 +90,13 @@ class Ngrok:
       time.sleep(1)
       if not self.is_available():
         # restart the service
-        self.stop_service()
-        self.start_service()
-        self.message(self.get_service_url())
+        self.stop_service().start_service().message(self.get_service_url())
+
+    return self
     
 if __name__ == "__main__":
   ngrok = Ngrok() 
-  ngrok.start_service()
-  ngrok.daemon()
+  ngrok.install()
+  # ngrok.authtoken('...')
+  ngrok.start_service().daemon()
 
